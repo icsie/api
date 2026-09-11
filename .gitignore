@@ -1,0 +1,48 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test, coverage, and type-checker caches
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.pyre/
+.ruff_cache/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+
+# FastAPI / Uvicorn local files
+*.log
+
+# PostgreSQL local data and backups
+postgres-data/
+pgdata/
+*.sql.gz
+*.dump
+
+# IDE and OS files
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.idea/
+.DS_Store
+Thumbs.db
