@@ -60,6 +60,14 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+Create the local environment file from the safe example and update the connection string with your PostgreSQL password:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+The `.env` file is ignored by Git. Keep real passwords and other secrets in `.env`, and commit only `.env.example` with placeholder values.
+
 ## Run Locally
 
 Start the development server from the project root:
