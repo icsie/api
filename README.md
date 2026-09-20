@@ -2,6 +2,10 @@
 
 A small FastAPI project for testing a Python API service with PostgreSQL note queries.
 
+The application serves a public web folder and exposes the API behind the `/api`
+prefix. In deployment, IIS can terminate HTTPS and reverse-proxy requests to the
+local Uvicorn server.
+
 ## Features
 
 - Health check endpoint
@@ -18,6 +22,7 @@ A small FastAPI project for testing a Python API service with PostgreSQL note qu
 - PostgreSQL
 - Psycopg
 - Uvicorn
+- IIS URL Rewrite / Application Request Routing (deployment)
 
 ## Project Structure
 
@@ -26,6 +31,7 @@ A small FastAPI project for testing a Python API service with PostgreSQL note qu
 ├── app/
 │   ├── core/
 │   │   └── db.py
+│   │   └── static_files.py
 │   ├── repositories/
 │   │   └── notes.py
 │   ├── routers/
@@ -33,9 +39,12 @@ A small FastAPI project for testing a Python API service with PostgreSQL note qu
 │   ├── schemas/
 │   │   └── notes.py
 │   └── main.py
+├── public/
+│   └── index.html
 ├── psql/
 │   └── createtables.sql
 ├── requirements.txt
+├── run.bat
 ├── .gitignore
 └── README.md
 ```
@@ -73,18 +82,79 @@ The `.env` file is ignored by Git. Keep real passwords and other secrets in `.en
 Start the development server from the project root:
 
 ```powershell
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8888
+.\run.bat
+```
+
+The script starts Uvicorn on `0.0.0.0:7777` with the deployment base path
+`/s115999999`:
+
+```powershell
+uvicorn app.main:app --reload --host 0.0.0.0 --port 7777 --root-path /s115999999
 ```
 
 The API is available at:
 
-- http://127.0.0.1:8888
-- Swagger UI: http://127.0.0.1:8888/docs
-- ReDoc: http://127.0.0.1:8888/redoc
+- HTTP root: http://127.0.0.1:7777
+- Swagger UI: http://127.0.0.1:7777/api/docs
+- ReDoc: http://127.0.0.1:7777/api/redoc
+
+The `public/` folder is served as the HTTP root. The file `public/index.html`
+is returned when opening `/`. Only `.html` and `.css` files are publicly served;
+other files such as `.gitignore`, `.env`, `.md`, and `.py` return `404 Not Found`.
+
+## IIS HTTPS Reverse Proxy
+
+For deployment, use IIS as the public HTTPS entry point and keep FastAPI bound
+to localhost. IIS receives HTTPS requests, then URL Rewrite and ARR forward
+them to Uvicorn:
+
+```text
+Client HTTPS
+    -> IIS (TLS certificate and URL Rewrite)
+    -> http://127.0.0.1:7777
+    -> FastAPI
+```
+
+Install these IIS components on the server:
+
+- URL Rewrite module
+- Application Request Routing (ARR)
+- An HTTPS binding with a valid certificate
+- ARR proxy enabled in IIS Manager
+
+Example `web.config` rule for forwarding the `/s115999999` application path:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.webServer>
+    <rewrite>
+      <rules>
+        <rule name="FastAPI reverse proxy" stopProcessing="true">
+          <match url="^s115999999/(.*)" />
+          <action type="Rewrite" url="http://127.0.0.1:7777/s115999999/{R:1}" />
+        </rule>
+      </rules>
+    </rewrite>
+  </system.webServer>
+</configuration>
+```
+
+After HTTPS and the rewrite rule are configured, use the public URL:
+
+```text
+https://your-domain.example/s115999999/
+https://your-domain.example/s115999999/api/docs
+https://your-domain.example/s115999999/api/health
+```
+
+Do not expose Uvicorn's port directly to the Internet. Restrict port `7777` to
+local or trusted server access and let IIS handle HTTPS certificates and public
+traffic.
 
 ## API Endpoints
 
-### `GET /health`
+### `GET /api/health`
 
 Returns the service health status.
 
@@ -94,7 +164,7 @@ Returns the service health status.
 }
 ```
 
-### `GET /version`
+### `GET /api/version`
 
 Returns the current API version.
 
@@ -104,7 +174,7 @@ Returns the current API version.
 }
 ```
 
-### `POST /items`
+### `POST /api/items`
 
 Accepts an item and returns the validated request data.
 
@@ -126,14 +196,14 @@ Response body:
 }
 ```
 
-### `GET /note/{id}`
+### `GET /api/note/{id}`
 
 Returns one note from PostgreSQL by its ID. A missing note returns `404 Not Found`.
 
 Example request:
 
 ```text
-GET /note/1
+GET /api/note/1
 ```
 
 Example response:

@@ -11,7 +11,8 @@ from app.core.db import get_db_connection
 from app.repositories.notes import get_note_by_id
 from app.schemas.notes import NoteResponse
 
-# prefix 會加在本模組所有路由前面，因此完整路徑是 /note/{note_id}。
+# prefix 會加在本模組所有路由前面；主 app 再加上 /api，
+# 因此完整路徑是 /api/note/{note_id}。
 router = APIRouter(prefix="/note", tags=["notes"])
 
 

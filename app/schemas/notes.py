@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 
 class NoteResponse(BaseModel):
-    """GET /note/{note_id} 回傳的資料格式。
+    """GET /api/note/{note_id} 回傳的資料格式。
 
     欄位名稱對應 notes 資料表及 repository SELECT 的欄位。
     created_at 會以 Python datetime 表示，最後由 FastAPI 序列化成 JSON
