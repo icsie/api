@@ -9,8 +9,15 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class NoteInput(BaseModel):
+    """建立或完整更新 note 時需要的資料。"""
+
+    title: str
+    content: str
+
+
 class NoteResponse(BaseModel):
-    """GET /api/note/{note_id} 回傳的資料格式。
+    """notes CRUD API 回傳的資料格式。
 
     欄位名稱對應 notes 資料表及 repository SELECT 的欄位。
     created_at 會以 Python datetime 表示，最後由 FastAPI 序列化成 JSON

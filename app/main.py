@@ -17,7 +17,7 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
-    # root_path="/s115999999",
+    root_path="/s115999999",
 )
 
 # 統一管理所有 API 路由，讓每個 API path 都以 /api 開頭。

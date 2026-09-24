@@ -130,9 +130,13 @@ Example `web.config` rule for forwarding the `/s115999999` application path:
   <system.webServer>
     <rewrite>
       <rules>
-        <rule name="FastAPI reverse proxy" stopProcessing="true">
-          <match url="^s115999999/(.*)" />
-          <action type="Rewrite" url="http://127.0.0.1:7777/s115999999/{R:1}" />
+        <rule name="s115999999-slash" stopProcessing="true">
+          <match url="^s115999999$" />
+          <action type="Redirect" url="/s115999999/" redirectType="Found" />
+        </rule>
+        <rule name="s115999999" stopProcessing="true">
+          <match url="^s115999999/(.*)$" />
+          <action type="Rewrite" url="http://<IP>:7777/{R:1}" appendQueryString="true" />
         </rule>
       </rules>
     </rewrite>
@@ -196,9 +200,28 @@ Response body:
 }
 ```
 
-### `GET /api/note/{id}`
+### Notes CRUD
 
-Returns one note from PostgreSQL by its ID. A missing note returns `404 Not Found`.
+The notes resource follows conventional REST HTTP methods:
+
+| Method | Path | Description | Success status |
+| --- | --- | --- | --- |
+| `GET` | `/api/note` | List all notes | `200 OK` |
+| `GET` | `/api/note/{id}` | Get one note | `200 OK` |
+| `POST` | `/api/note` | Create a note | `201 Created` |
+| `PUT` | `/api/note/{id}` | Replace a note | `200 OK` |
+| `DELETE` | `/api/note/{id}` | Delete a note | `204 No Content` |
+
+Missing note IDs return `404 Not Found`.
+
+Create or replace request body:
+
+```json
+{
+  "title": "API note",
+  "content": "Created through the REST API."
+}
+```
 
 Example request:
 
