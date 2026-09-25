@@ -7,13 +7,14 @@ from starlette.staticfiles import StaticFiles
 
 
 class HtmlCssOnlyStaticFiles(StaticFiles):
-    """只提供 HTML 與 CSS 檔案，拒絕其他公開檔案類型。
+    """只提供允許的前端靜態資源，拒絕其他公開檔案類型。
 
     目錄本身仍會交給 Starlette 處理，這樣根目錄可以透過 html=True
-    找到 index.html；只有實際要回傳的檔案會受到副檔名白名單限制。
+    找到 index.html；實際檔案則必須符合副檔名或目錄白名單。
     """
 
-    allowed_extensions = {".html", ".css"}
+    allowed_extensions = {".css", ".html", ".svg"}
+    allowed_directories = {"js", "json"}
 
     def lookup_path(self, path: str):
         """查找檔案，並在回傳前拒絕非 HTML/CSS 的一般檔案。"""
@@ -24,8 +25,13 @@ class HtmlCssOnlyStaticFiles(StaticFiles):
         if stat_result is None or not stat.S_ISREG(stat_result.st_mode):
             return full_path, stat_result
 
-        # 副檔名使用小寫比較，讓 .HTML 與 .CSS 也能正常使用。
-        if Path(path).suffix.lower() not in self.allowed_extensions:
+        # js/ 與 json/ 目錄內的檔案可提供，不限制其副檔名。
+        path_parts = Path(path).parts
+        is_allowed_directory = bool(path_parts) and path_parts[0].lower() in self.allowed_directories
+
+        # 其他位置只允許 HTML、CSS、SVG，副檔名不分大小寫。
+        is_allowed_extension = Path(path).suffix.lower() in self.allowed_extensions
+        if not is_allowed_directory and not is_allowed_extension:
             return "", None
 
         return full_path, stat_result
