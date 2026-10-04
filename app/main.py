@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from app.core.static_files import HtmlCssOnlyStaticFiles
 from app.routers.notes import router as notes_router
+from app.routers.subclass import router as subclass_router
 
 # 建立整個 API 應用程式。FastAPI 會使用這個物件註冊路由與產生文件。
 app = FastAPI(
@@ -25,6 +26,7 @@ api_router = APIRouter(prefix="/api")
 
 # 將 notes router 加入 API router，完整路徑會是 /api/note/{note_id}。
 api_router.include_router(notes_router)
+api_router.include_router(subclass_router)
 
 # 將專案根目錄下的 public 資料夾作為 HTTP 靜態檔案根目錄。
 # html=True 會讓 GET / 自動回傳靜態資料夾中的 index.html。
