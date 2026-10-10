@@ -21,7 +21,7 @@ class HtmlCssOnlyStaticFiles(StaticFiles):
 
         full_path, stat_result = super().lookup_path(path)
 
-        # 目錄要保留，因為 StaticFiles 需要用它尋找 index.html。
+        # 目錄要保留，因為 STaticFiles 需要用它尋找 index.html。
         if stat_result is None or not stat.S_ISREG(stat_result.st_mode):
             return full_path, stat_result
 

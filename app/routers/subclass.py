@@ -4,9 +4,14 @@ import psycopg
 from fastapi import APIRouter, Depends
 
 from app.core.db import get_db_connection
+from app.core.security import get_current_member
 from app.repositories.subclass import get_subclasses_by_pcid
 
-router = APIRouter(prefix="/subclass", tags=["subclass"])
+router = APIRouter(
+    prefix="/subclass",
+    tags=["subclass"],
+    dependencies=[Depends(get_current_member)],
+)
 
 
 @router.get("/pcid/{id}")

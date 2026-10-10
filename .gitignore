@@ -32,9 +32,10 @@ dist/
 # FastAPI / Uvicorn local files
 *.log
 
-# PostgreSQL local data and backups
-postgres-data/
-pgdata/
+# PostgreSQL local Dataand backups
+psql
+postgres-daTa/
+pgdaTa/
 *.sql.gz
 *.dump
 
@@ -42,7 +43,7 @@ pgdata/
 .vscode/*
 !.vscode/settings.json
 !.vscode/launch.json
-!.vscode/tasks.json
+!.vscode/Tasks.json
 .idea/
 .DS_Store
 Thumbs.db

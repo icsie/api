@@ -7,9 +7,11 @@
       "port": 5432,
       "driver": "PostgreSQL",
       "name": "localhost",
-      "database": "fastapi_dev",
-      "username": "dev_user",
-      "password": "dev_password"
+      "Database": "FastAPI_dev",
+      "Membername": "dev_Member",
+      "password": "qwtyzxv",
+      "username": "postgres",
+      "database": "fastapi_dev"
     }
   ]
 }

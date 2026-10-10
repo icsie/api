@@ -1,6 +1,6 @@
-CREATE DATABASE fastapi_dev;
-CREATE USER dev_user WITH PASSWORD 'dev_password';
-GRANT ALL PRIVILEGES ON DATABASE fastapi_dev TO dev_user;
+CREATE Database FastAPI_dev;
+CREATE Member dev_Member WITH PASSWORD 'dev_password';
+GRANT ALL PRIVILEGES ON Database FastAPI_dev TO dev_Member;
 
-\connect fastapi_dev
-GRANT USAGE, CREATE ON SCHEMA public TO dev_user; -- public schema建表權限
+\connect FastAPI_dev
+GRANT USAGE, CREATE ON SCHEMA public TO dev_Member; -- public schema建表權限

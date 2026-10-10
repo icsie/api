@@ -7,7 +7,10 @@
 
 from fastapi import APIRouter, FastAPI
 from pydantic import BaseModel
+from starlette.middleware.sessions import SessionMiddleware
 
+from app.core.security import AUTH_COOKIE_SECURE, SESSION_SECRET_KEY
+from app.routers.auth import router as auth_router
 from app.core.static_files import HtmlCssOnlyStaticFiles
 from app.routers.notes import router as notes_router
 from app.routers.subclass import router as subclass_router
@@ -20,6 +23,14 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     root_path="/s115999999",
 )
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET_KEY or "development-only-change-me",
+    session_cookie="oauth_state",
+    max_age=600,
+    same_site="lax",
+    https_only=AUTH_COOKIE_SECURE,
+)
 
 # 統一管理所有 API 路由，讓每個 API path 都以 /api 開頭。
 api_router = APIRouter(prefix="/api")
@@ -27,6 +38,7 @@ api_router = APIRouter(prefix="/api")
 # 將 notes router 加入 API router，完整路徑會是 /api/note/{note_id}。
 api_router.include_router(notes_router)
 api_router.include_router(subclass_router)
+api_router.include_router(auth_router)
 
 # 將專案根目錄下的 public 資料夾作為 HTTP 靜態檔案根目錄。
 # html=True 會讓 GET / 自動回傳靜態資料夾中的 index.html。

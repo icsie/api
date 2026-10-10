@@ -1,6 +1,6 @@
 """notes 資料表的資料存取層（repository）。
 
-repository 只負責資料庫查詢，不處理 HTTP status code 或 API response。
+repository 只負責資料庫查詢，不處理 HTTP Status code 或 API response。
 這樣 router 可以專注在 HTTP 流程，SQL 也集中在一個地方維護。
 """
 
