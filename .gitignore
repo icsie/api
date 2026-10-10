@@ -33,7 +33,6 @@ dist/
 *.log
 
 # PostgreSQL local Dataand backups
-psql
 postgres-daTa/
 pgdaTa/
 *.sql.gz
