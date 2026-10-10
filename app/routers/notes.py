@@ -8,7 +8,6 @@ import psycopg
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.db import get_db_connection
-from app.core.security import get_current_member
 from app.repositories.notes import (
     create_note,
     delete_note,
@@ -20,11 +19,7 @@ from app.schemas.notes import NoteInput, NoteResponse
 
 # prefix 會加在本模組所有路由前面；主 app 再加上 /api，
 # 因此完整路徑是 /api/note/{note_id}。
-router = APIRouter(
-    prefix="/note",
-    tags=["notes"],
-    dependencies=[Depends(get_current_member)],
-)
+router = APIRouter(prefix="/note", tags=["notes"])
 
 
 @router.get("", response_model=list[NoteResponse])

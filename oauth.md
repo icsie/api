@@ -9,7 +9,7 @@
 - 正式 Google callback：`GET /api/auth/google/callback`。Google Cloud Console 與 `GOOGLE_REDIRECT_URI` 必須逐字相同；目前使用公開 HTTPS host 與 `/s115999999` 部署前綴，路徑尾端**不加斜線**。
 - callback 別名仍存在：`/api/auth/callback`、`/api/auth/callback/`。正式設定仍建議統一使用上面的 `/google/callback` 路徑。
 - 登入成功後，後端以 HttpOnly cookie 傳 JWT；`GET /api/auth/me` 回傳登入者資料。
-- Notes 與 subclass 路由要求已驗證 JWT，health/version 等公開路由不受影響。
+- `/api/note` 的 CRUD 路由維持公開；`/api/subclass` 要求有效 OAuth 登入 JWT。兩者仍需 PostgreSQL 可用且資料庫帳號具備查詢權限。`/api/auth/me` 也要求有效登入。
 - DB 連線及 `member` 表曾確認存在，但當時 API 使用的 `dev_user` 對 table 和 identity sequence 沒有權限。最新 SQL 已加入 GRANT；需以具備授權權限的 DB role 執行後才會生效。
 - **目前 `psql/createtables.sql` 檔尾有未完成的 `SELECT *`。先修正或移除該行，再執行 SQL；不可直接執行整份腳本，因為前段會 DROP 並重建 `notes`。**
 
@@ -21,8 +21,8 @@
 | [app/routers/auth.py](app/routers/auth.py) | Authlib 註冊 Google OpenID Connect metadata 及 `openid email profile` scope。`google_login()` 轉址到 Google；`google_callback()` 驗證授權回應、檢查 `sub/email/email_verified`、upsert member、簽發 JWT cookie；`read_current_member()` 提供前端 profile。 |
 | [app/core/security.py](app/core/security.py) | 建立 HS256 JWT，驗證 cookie 或 Bearer token 的簽章、issuer、必要 claims 與期限，再以 `sub` 作 member id。先驗 JWT、後取 DB，確保未登入請求可以直接得到 401。 |
 | [app/repositories/member.py](app/repositories/member.py) | 使用參數化 SQL 將 Google profile 寫入 `member`；`google_sub` 衝突時更新 profile。另依 JWT member id 查詢仍存在且已驗證的 member。 |
-| [app/routers/notes.py](app/routers/notes.py) | router 層級加入 `Depends(get_current_member)`，保護整組 notes API。 |
-| [app/routers/subclass.py](app/routers/subclass.py) | router 層級加入同一個 member dependency，保護 subclass API。 |
+| [app/routers/notes.py](app/routers/notes.py) | 公開 notes CRUD 路由；使用 `get_db_connection` 存取資料，但不要求 OAuth/JWT。 |
+| [app/routers/subclass.py](app/routers/subclass.py) | 使用 router-level `Depends(get_current_member)` 保護 subclass GET 路由；有效 JWT 與 DB member 均需存在。 |
 | [app/core/db.py](app/core/db.py) | 由 `DATABASE_URL` 建立 psycopg connection，FastAPI request 結束時關閉 connection。 |
 | [psql/createtables.sql](psql/createtables.sql) | 定義 `member` 表及 `dev_user` 的 table/identity sequence 權限。腳本也會刪除並重建 notes，請先修復檔尾未完成 SQL，並避免在有 notes 資料的正式 DB 執行整份腳本。 |
 | [requirements.txt](requirements.txt) | 登入依賴包含 Authlib、PyJWT、httpx、itsdangerous；`itsdangerous` 是 Starlette SessionMiddleware 簽署 session 所需。 |
