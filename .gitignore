@@ -32,7 +32,8 @@ dist/
 # FastAPI / Uvicorn local files
 *.log
 
-# PostgreSQL local Dataand backups
+# PostgreSQL local Dataand 
+academic/
 postgres-daTa/
 pgdaTa/
 *.sql.gz
