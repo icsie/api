@@ -14,7 +14,7 @@ def get_subclasses_by_pcid(
 
     with connection.cursor(row_factory=dict_row) as cursor:
         cursor.execute(
-            "SELECT pcid, parent_name, cid, child_name FROM vd_subclass WHERE pcid = %s",
+            "SELECT * FROM eer_subclass WHERE pcid = %s",
             (pcid,),
         )
         return cursor.fetchall()

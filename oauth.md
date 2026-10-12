@@ -8,7 +8,7 @@
 - 登出端點：`POST /api/auth/logout`，回傳 204 並使目前瀏覽器的 JWT cookie 失效。
 - 正式 Google callback：`GET /api/auth/google/callback`。Google Cloud Console 與 `GOOGLE_REDIRECT_URI` 必須逐字相同；目前使用公開 HTTPS host 與 `/s115999999` 部署前綴，路徑尾端**不加斜線**。
 - callback 別名仍存在：`/api/auth/callback`、`/api/auth/callback/`。正式設定仍建議統一使用上面的 `/google/callback` 路徑。
-- 登入成功後，後端以 HttpOnly cookie 傳 JWT；`GET /api/auth/me` 回傳登入者資料。
+- 登入成功後，後端以 HttpOnly cookie 傳 JWT；`GET /api/auth/me` 回傳資料庫中的 member `id` 與登入者資料，前端以此 `id` 呼叫 `/api/subclass/pcid/{id}`。
 - `/api/note` 的 CRUD 路由維持公開；`/api/subclass` 要求有效 OAuth 登入 JWT。兩者仍需 PostgreSQL 可用且資料庫帳號具備查詢權限。`/api/auth/me` 也要求有效登入。
 - DB 連線及 `member` 表曾確認存在，但當時 API 使用的 `dev_user` 對 table 和 identity sequence 沒有權限。最新 SQL 已加入 GRANT；需以具備授權權限的 DB role 執行後才會生效。
 - **目前 `psql/createtables.sql` 檔尾有未完成的 `SELECT *`。先修正或移除該行，再執行 SQL；不可直接執行整份腳本，因為前段會 DROP 並重建 `notes`。**

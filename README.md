@@ -115,7 +115,7 @@ login (including `/s115999999/` when deployed under that path).
 | --- | --- | --- |
 | `GET` | `/api/auth/google/login` | Redirect to Google sign-in |
 | `GET` | `/api/auth/google/callback` | OAuth callback; persists the member and sets an HttpOnly JWT cookie |
-| `GET` | `/api/auth/me` | Return `name`, `email`, and `picture`; returns `401` when signed out |
+| `GET` | `/api/auth/me` | Return the database member `id`, `name`, `email`, and `picture`; returns `401` when signed out |
 
 The callback is handled server-side. The JWT is sent as a same-origin cookie by
 the browser; API clients may alternatively send it as `Authorization: Bearer`.

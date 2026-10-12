@@ -33,7 +33,7 @@ dist/
 *.log
 
 # PostgreSQL local Dataand 
-academic/
+academic/   
 postgres-daTa/
 pgdaTa/
 *.sql.gz

@@ -114,10 +114,15 @@ async def google_callback(
 @router.get("/me")
 def read_current_member(
     member: dict[str, Any] = Depends(get_current_member),
-) -> dict[str, str | None]:
+) -> dict[str, int | str | None]:
     """Return the signed-in profile expected by the frontend."""
 
-    return {"name": member["name"], "email": member["email"], "picture": member["picture"]}
+    return {
+        "id": member["id"],
+        "name": member["name"],
+        "email": member["email"],
+        "picture": member["picture"],
+    }
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
