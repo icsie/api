@@ -5,15 +5,19 @@
 讓不同功能可以分開維護。
 """
 
-from fastapi import APIRouter, FastAPI
+import psycopg
+from fastapi import APIRouter, Depends, FastAPI
 from pydantic import BaseModel
 from starlette.middleware.sessions import SessionMiddleware
 
+from app.core.db import get_db_connection
 from app.core.security import AUTH_COOKIE_SECURE, SESSION_SECRET_KEY
 from app.routers.auth import router as auth_router
 from app.core.static_files import HtmlCssOnlyStaticFiles
 from app.routers.notes import router as notes_router
 from app.routers.subclass import router as subclass_router
+from app.repositories.co import get_co_by_cid
+from app.repositories.subclass import get_subclasses_by_pcid
 
 # 建立整個 API 應用程式。FastAPI 會使用這個物件註冊路由與產生文件。
 app = FastAPI(
@@ -57,6 +61,25 @@ def health_check():
     """提供簡單的服務健康檢查。"""
 
     return {"status": "ok"}
+
+
+@api_router.get("/root", tags=["subclass"])
+def read_root_subclasses(
+    connection: psycopg.Connection = Depends(get_db_connection),
+) -> list[dict[str, object]]:
+    """回傳根節點（pcid=0）底下的 subclass。"""
+
+    return get_subclasses_by_pcid(connection, 0, "n")
+
+
+@api_router.get("/root/co/{cid}", tags=["root"])
+def read_root_co_by_cid(
+    cid: int,
+    connection: psycopg.Connection = Depends(get_db_connection),
+) -> list[dict[str, object]]:
+    """依照 class id 回傳根節點下的 class-object rows。"""
+
+    return get_co_by_cid(connection, cid)
 
 
 @api_router.get("/version")

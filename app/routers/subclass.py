@@ -21,4 +21,4 @@ def read_subclasses_by_pcid(
 ) -> list[dict[str, object]]:
     """依照 parent class id 回傳所有 subclass。"""
 
-    return get_subclasses_by_pcid(connection, id)
+    return get_subclasses_by_pcid(connection, id, "cid")
