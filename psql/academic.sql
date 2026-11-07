@@ -87,6 +87,7 @@ AS $$
 DECLARE
     v_ccid integer;
     parent_idpath varchar(100);
+    parent_namepath varchar(200);
 BEGIN
     if exists (select 1 from class where cid = $1) = false then
         RAISE EXCEPTION 'Parent class with cid % does not exist', pcid;
@@ -114,13 +115,13 @@ BEGIN
     VALUES ($1, v_ccid)
     ON CONFLICT ON CONSTRAINT pk_inheritance DO NOTHING;
 
-    SELECT idpath   -- Get the idpath of the parent class
-    INTO parent_idpath
+    SELECT idpath, namepath   -- Get the full paths of the parent class
+    INTO parent_idpath, parent_namepath
     FROM class
     WHERE cid = $1;
 
     UPDATE class
-    SET namepath = concat_ws('/', NULLIF($2, ''), $3),
+    SET namepath = concat_ws('/', NULLIF(parent_namepath, ''), $3),
         idpath = concat_ws('/', NULLIF(parent_idpath, ''), v_ccid::varchar)
     WHERE cid = v_ccid;
 
