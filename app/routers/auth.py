@@ -95,6 +95,7 @@ async def google_callback(
         user_info.get("name"),
         user_info.get("picture"),
     )
+    request.state.mid = member["id"]
     response = RedirectResponse(
         url=os.getenv("AUTH_SUCCESS_REDIRECT_URL", "/"),
         status_code=status.HTTP_303_SEE_OTHER,
@@ -126,9 +127,10 @@ def read_current_member(
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout() -> Response:
+def logout(request: Request) -> Response:
     """Clear the browser's JWT cookie; safe to call when already logged out."""
 
+    request.state.api_session_ended = True
     response = Response(status_code=status.HTTP_204_NO_CONTENT)
     response.delete_cookie(
         key=AUTH_COOKIE_NAME,

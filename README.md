@@ -287,3 +287,38 @@ The Database connection, SQL repository, API router, and response schema are sep
 ## License
 
 This project is distributed under the license in [LICENSE](LICENSE).
+# API session 與 request log
+
+先以資料表擁有者執行 `psql/api_logging.sql`，建立資料表、索引與
+`dev_user` 的權限；若 `DATABASE_URL` 使用其他帳號，請調整 SQL 中的角色。
+這支 SQL 不會清空既有資料，請勿為此重跑含有 `DROP TABLE` 的初始化檔。
+
+設定 `DATABASE_URL`、`SESSION_SECRET_KEY` 與 `AUTH_COOKIE_SECURE`。
+本機 HTTP 請設定 `AUTH_COOKIE_SECURE=false`，正式 HTTPS 使用 `true`。
+缺少 `SESSION_SECRET_KEY` 時不會發出 session Cookie，請求會各自建立 session。
+
+Middleware 只記錄 `/api` 與 `/api/` 下的 HTTP 請求。簽章的 `api_session`
+Cookie 將請求關聯至 `api_sessions`；登入成功或驗證會員後更新 `mid`，
+登出時更新 `ended_at` 並刪除 Cookie。過期 Cookie 會建立新的 session；
+`ended_at` 只表示明確登出，非瀏覽器關閉或閒置到期。
+此 session 用於追蹤紀錄，登入驗證仍使用原本的 JWT。
+
+每次回應送出後，使用 psycopg `AsyncConnection` 在同一筆 transaction
+更新 session 並新增 log；每個請求開啟、關閉一條非同步連線，最長等待 5 秒。
+這不是持久化佇列：程序被強制終止或資料庫故障時，該筆紀錄可能遺失。
+寫入失敗會輸出到伺服器 logger，不修改已送出的 HTTP 回應。
+
+未預期錯誤回傳 `500 {"detail":"Internal server error"}`，完整 traceback
+留在伺服器 logger。HTTPException 與驗證失敗保留 FastAPI 原有回應；
+資料庫 message 記錄 `HTTP 401`、`HTTP 422` 等摘要，不儲存請求內容、
+query string、Token 或原始例外訊息。
+
+Session 的 IP 是建立時 IP，log 的 IP 是每次請求的 IP，取自 ASGI
+`request.client`。反向代理部署請正確設定 Uvicorn 的可信任代理，
+避免直接信任用戶傳入的 `X-Forwarded-For`。
+
+Windows 請使用 `run.bat`，或在 Uvicorn 指令加入
+`--loop app.core.event_loop:selector_loop_factory`，以使用 psycopg 支援的
+SelectorEventLoop。
+
+驗證：`venv\Scripts\python.exe -m unittest discover -s tests -v`。

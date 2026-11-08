@@ -9,6 +9,7 @@ import psycopg
 from fastapi import APIRouter, Depends, FastAPI
 from pydantic import BaseModel
 from starlette.middleware.sessions import SessionMiddleware
+from app.core.request_logging import RequestLoggingMiddleware
 
 from app.core.db import get_db_connection
 from app.core.security import AUTH_COOKIE_SECURE, SESSION_SECRET_KEY
@@ -35,6 +36,7 @@ app.add_middleware(
     same_site="lax",
     https_only=AUTH_COOKIE_SECURE,
 )
+app.add_middleware(RequestLoggingMiddleware)
 
 # 統一管理所有 API 路由，讓每個 API path 都以 /api 開頭。
 api_router = APIRouter(prefix="/api")

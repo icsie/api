@@ -76,6 +76,7 @@ def get_authenticated_member_id(
 
 
 def get_current_member(
+    request: Request,
     member_id: int = Depends(get_authenticated_member_id),
     connection: psycopg.Connection = Depends(get_db_connection),
 ) -> dict[str, Any]:
@@ -88,4 +89,5 @@ def get_current_member(
             detail="Authentication required",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    request.state.mid = member["id"]
     return member
